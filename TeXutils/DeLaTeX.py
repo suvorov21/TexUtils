@@ -1,12 +1,21 @@
+#!/usr/bin/env python
+
 import re
+from termcolor import colored as col
 
 class DeLaTeX:
     def __init__(self, file_in="", file_out=""):
         self.file_in    = file_in
         self.file_out   = file_out
+        self.replace    = []
+        
+    def AddReplacement(self, l):
+        for pair in l:
+            self.replace.append(pair)
 
-    def Do(self):
-
+    def DoParse(self):
+        print("Parsing TeX.........", end='')
+        
         fo = open(self.file_out, 'w')
 
         # citations anf ref commands
@@ -29,9 +38,13 @@ class DeLaTeX:
                 # EOF
                 if r'\end{document}' in line:
                     break
+                # service tags
+                if r'\maketitle' in line or r'\clearpage' in line or \
+                r'\tableofcontents' in line or r'\linenumbers' in line:
+                    continue
                 # skip labels
                 if r'\label' in line:
-                    continue
+                    continue    
                 # skip all equation/figures/tables/comments  blocks
                 if r'\begin' in line and block == '':
                     block = re.sub(r'\\begin{([^}]+)}.*\n',r'\1',line)
@@ -87,9 +100,28 @@ class DeLaTeX:
                 line = re.sub(r'\\subsubsection{(.+)}',r'\1',line)
                 line = re.sub(r'\\subsubsubsection{(.+)}',r'\1',line)
 
-                line = re.sub(r'\\todo{(.+)}',r'\1',line)
-
+                for pair in self.replace:
+                    line = re.sub(pair[0], pair[1], line)
                 fo.write(line)
 
         fo.close()
-        return True
+        if block == '':
+            print(f'[{col("OK", color="green")}]') 
+            return True
+        else:
+            print(f'[{col("FAIL", color="red")}]')
+            print(f'Some begin//end block remained unparsed')
+            print('Some part of the file could be missed')
+            return False
+
+import click
+from termcolor import colored as col
+@click.command()
+@click.argument('input_file')
+@click.argument('output_file')
+def main(input_file, output_file):
+    parser =  DeLaTeX(input_file, output_file)
+    parser.DoParse()
+
+if __name__ == '__main__':
+    main()
