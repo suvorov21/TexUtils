@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 
-from termcolor import colored as col
-
 class BibParser:
     def __init__(self, file_in="", file_out="", skip=0):
         self.file_in    = file_in

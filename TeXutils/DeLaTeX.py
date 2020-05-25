@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import re
-from termcolor import colored as col
 
 class DeLaTeX:
     def __init__(self, file_in="", file_out=""):

@@ -1,4 +1,8 @@
 import setuptools
+import sys
+
+if sys.version_info[:2] < (3, 6):
+    raise RuntimeError("Python version must be >= 3.6")
 
 setuptools.setup(
 	name='TeXutils',
@@ -15,6 +19,4 @@ setuptools.setup(
         bibparser=TeXutils.BibParser:main
         delatex=TeXutils.DeLaTeX:main
     ''',
-
     )
-
