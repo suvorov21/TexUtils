@@ -8,14 +8,14 @@ class DeLaTeX:
         self.file_in    = file_in
         self.file_out   = file_out
         self.replace    = []
-        
+
     def AddReplacement(self, l):
         for pair in l:
             self.replace.append(pair)
 
     def DoParse(self):
         print("Parsing TeX.........", end='')
-        
+
         fo = open(self.file_out, 'w')
 
         # citations anf ref commands
@@ -44,7 +44,7 @@ class DeLaTeX:
                     continue
                 # skip labels
                 if r'\label' in line:
-                    continue    
+                    continue
                 # skip all equation/figures/tables/comments  blocks
                 if r'\begin' in line and block == '':
                     block = re.sub(r'\\begin{([^}]+)}.*\n',r'\1',line)
@@ -73,6 +73,8 @@ class DeLaTeX:
                 line = re.sub(r'\$[^\$]+\$', 'X', line)
                 # keep percentage sign
                 line = re.sub(r'\\(%)', r'\1', line)
+                # replace all the dashes
+                line = re.sub(r'(---|--|-)', '-', line)
 
                 # remove citations and references
                 # cite
@@ -106,7 +108,7 @@ class DeLaTeX:
 
         fo.close()
         if block == '':
-            print(f'[{col("OK", color="green")}]') 
+            print(f'[{col("OK", color="green")}]')
             return True
         else:
             print(f'[{col("FAIL", color="red")}]')
