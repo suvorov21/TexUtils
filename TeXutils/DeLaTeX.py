@@ -6,7 +6,49 @@ class DeLaTeX:
     def __init__(self, file_in="", file_out=""):
         self.file_in    = file_in
         self.file_out   = file_out
-        self.replace    = []
+
+        # citations anf ref commands
+        # citations prefixes
+        self.cite = 'cite'
+        # reference prefixes
+        self.ref = 'ref|autoref|nameref'
+
+        # fill the replacement list with:
+        # [regex,       replacement]
+        self.replace    = ([
+            # remove symbol which is a prefix, e.g. $\beta$-particle
+            [r'\$[^\$]+\$-',            ''],
+            # replace the equations
+            [r'\$[^\$]+\$',             'X'],
+            # keep percentage sign
+            [r'\\(%)',                  r'\1'],
+            # replace all the dashes
+            [r'(---|--|-)',             '-'],
+
+            # remove citations and references
+            [r'in.(Ref\..|)\\(' + self.cite + '){[^}]+}', '  in the paper'],
+            [r'(~|)\\(' + self.cite + '){[^}]+}',            ''],
+            # references
+            # replace the direct references with the keywords to keep consistancy
+            [r'in (the |)(\\(' + self.ref + '){fig:[^}]+})', 'in the figure'],
+            [r'in (the |)(\\(' + self.ref + '){tbl:[^}]+})', 'in the table'],
+            [r'in (the |)(\\(' + self.ref + '){eq:[^}]+})',  'in the equation'],
+            [r'in (the |)(\\(' + self.ref + '){(sec|ch):[^}]+})', 'in the section'],
+
+            # remove all the rest references
+            [r'( \\(' + self.ref + '){[^}]+})',      ''],
+            [r'(~\\(' + self.ref + '){[^}]+})',      ''],
+            [r'( \(\\(' + self.ref + '){[^}]+}\))',  ''],
+            [r'(\\(' + self.ref + '){[^}]+})',       ''],
+
+            # extract sections' headers
+            [r'\\part{(.+)}',                   r'\1'],
+            [r'\\chapter{(.+)}',                r'\1'],
+            [r'\\section{(.+)}',                r'\1'],
+            [r'\\subsection{(.+)}',             r'\1'],
+            [r'\\subsubsection{(.+)}',          r'\1'],
+            [r'\\subsubsubsection{(.+)}',       r'\1']
+            ])
 
     def AddReplacement(self, l):
         for pair in l:
@@ -16,12 +58,6 @@ class DeLaTeX:
         print("Parsing TeX.........", end='')
 
         fo = open(self.file_out, 'w')
-
-        # citations anf ref commands
-        # citations prefixes
-        cite = 'cite'
-        # reference prefixes
-        ref = 'ref|autoref|nameref'
 
         with open(self.file_in) as f:
             i = 0
@@ -65,44 +101,15 @@ class DeLaTeX:
                         block = ''
                         continue;
 
-                # skip/replace inline equations
-                # remove symbol which is a prefix, e.g. $\beta$-particle
-                line = re.sub(r'\$[^\$]+\$-', '', line)
-                # replace the equations
-                line = re.sub(r'\$[^\$]+\$', 'X', line)
-                # keep percentage sign
-                line = re.sub(r'\\(%)', r'\1', line)
-                # replace all the dashes
-                line = re.sub(r'(---|--|-)', '-', line)
-
-                # remove citations and references
-                # cite
-                line = re.sub(r'in.\\(' + cite + '){[^}]+}', 'in the paper', line)
-                line = re.sub(r'(~|)\\(' + cite + '){[^}]+}', '', line)
-
-                # ref
-                # replace the direct references with the keywords to keep consistancy
-                line = re.sub(r'in (the |)(\\(' + ref + '){fig:[^}]+})', 'in the figure', line)
-                line = re.sub(r'in (the |)(\\(' + ref + '){tbl:[^}]+})', 'in the table', line)
-                line = re.sub(r'in (the |)(\\(' + ref + '){eq:[^}]+})', 'in the equation', line)
-                line = re.sub(r'in (the |)(\\(' + ref + '){(sec|ch):[^}]+})', 'in the section', line)
-
-                # remove all the rest references
-                line = re.sub(r'( \\(' + ref + '){[^}]+})', '', line)
-                line = re.sub(r'(~\\(' + ref + '){[^}]+})', '', line)
-                line = re.sub(r'( \(\\(' + ref + '){[^}]+}\))', '', line)
-                line = re.sub(r'(\\(' + ref + '){[^}]+})', '', line)
-
-                # extract sections' headers
-                line = re.sub(r'\\part{(.+)}',r'\1',line)
-                line = re.sub(r'\\chapter{(.+)}',r'\1',line)
-                line = re.sub(r'\\section{(.+)}',r'\1',line)
-                line = re.sub(r'\\subsection{(.+)}',r'\1',line)
-                line = re.sub(r'\\subsubsection{(.+)}',r'\1',line)
-                line = re.sub(r'\\subsubsubsection{(.+)}',r'\1',line)
-
+                # do the replacements from self.replace
                 for pair in self.replace:
-                    line = re.sub(pair[0], pair[1], line)
+                    try:
+                        line = re.sub(pair[0], pair[1], line)
+                    except:
+                        print(f'[{col("FAIL", color="red")}]')
+                        print(f'Error while parsing with regex: {pair[0]}')
+                        return False
+
                 fo.write(line)
 
         fo.close()
