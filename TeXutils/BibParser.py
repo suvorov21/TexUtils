@@ -7,7 +7,7 @@ class BibParser:
         self.skip       = 0
 
     # simple bracket parser
-    def BracketParser(self, line):
+    def bracket_parser(self, line):
         ls = []
         if '=' in line:
             for ch in line:
@@ -39,7 +39,7 @@ class BibParser:
         return True
 
 
-    def DoParse(self):
+    def do_parse(self):
         print("Parsing BiBTeX.........", end='')
         fo = open(self.file_out, 'w')
 
@@ -79,7 +79,7 @@ class BibParser:
                 line = line.replace(r"{\%}", "%")
                 line = line.replace(r"{\&}", "&")
 
-                if not self.BracketParser(line):
+                if not self.bracket_parser(line):
                     print(f'[{col("FAIL", color="red")}]')
                     print(f'Error while handling', line)
                     return False
@@ -99,7 +99,7 @@ from termcolor import colored as col
               help='number of lines to skip from the top of the file')
 def main(input_file, output_file, skip):
     parser = BibParser(input_file, output_file, skip)
-    parser.DoParse()
+    parser.do_parse()
 
 if __name__ == '__main__':
     main()

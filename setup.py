@@ -1,8 +1,4 @@
 import setuptools
-import sys
-
-if sys.version_info[:2] < (3, 6):
-    raise RuntimeError("Python version must be >= 3.6")
 
 setuptools.setup(
 	name='TeXutils',
@@ -10,6 +6,7 @@ setuptools.setup(
     author="Sergey",
     author_email="suvorov a_t inr ru",
     packages=setuptools.find_packages(),
+    python_requires='>=3.6',
     install_requires=[
         'Click',
         'termcolor'

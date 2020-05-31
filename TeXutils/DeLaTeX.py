@@ -50,11 +50,11 @@ class DeLaTeX:
             [r'\\subsubsubsection{(.+)}',       r'\1']
             ])
 
-    def AddReplacement(self, l):
+    def add_replacement(self, l):
         for pair in l:
             self.replace.append(pair)
 
-    def DoParse(self):
+    def do_parse(self):
         print("Parsing TeX.........", end='')
 
         fo = open(self.file_out, 'w')
@@ -129,7 +129,7 @@ from termcolor import colored as col
 @click.argument('output_file')
 def main(input_file, output_file):
     parser =  DeLaTeX(input_file, output_file)
-    parser.DoParse()
+    parser.do_parse()
 
 if __name__ == '__main__':
     main()
