@@ -4,8 +4,8 @@ import re
 
 class DeLaTeX:
     def __init__(self, file_in="", file_out=""):
-        self.file_in    = file_in
-        self.file_out   = file_out
+        self.file_in = file_in
+        self.file_out = file_out
 
         # citations anf ref commands
         # citations prefixes
@@ -60,7 +60,6 @@ class DeLaTeX:
         fo = open(self.file_out, 'w')
 
         with open(self.file_in) as f:
-            i = 0
             block = ''
             # skip headers
             for line in f:
@@ -81,25 +80,39 @@ class DeLaTeX:
                 if r'\label' in line:
                     continue
                 # skip all equation/figures/tables/comments  blocks
-                if r'\begin' in line and block == '':
-                    block = re.sub(r'\\begin{([^}]+)}.*\n',r'\1',line)
+                if r'\begin' in line:
+                    block_parse = re.search(
+                                            r'\\begin{([^}]+)}.*\n',
+                                            line
+                                            ).group(1)
 
-                if block != '' and block != 'itemize' and block != 'enumerate':
-                    end_block = r'\end{' + block + "}"
-                    if end_block in line:
-                        block = ''
-                        continue
+                    if block == '':
+                        block = block_parse
+                    # nested lists support
+                    elif block_parse in ('itemize', 'enumerate'):
+                        block += block_parse
+                    continue
+
+                if r'\end' in line:
+                    # nested list support
+                    if 'itemize' in block or 'enumerate' in block:
+                        block = block.replace(
+                            re.search(r'\\end{([^}]+)}.*\n', line).group(1),
+                            '',
+                            1)
+
                     else:
+                        # 'normal' block end
+                        end_block = r'\end{' + block + "}"
+                        if end_block in line:
+                            block = ''
                         continue
 
                 # parse item or numerate lists
-                if block == 'itemize' or block == 'enumerate':
-                    if r'\begin' in line:
-                        continue;
-                    line = re.sub(r'\\item', '', line)
-                    if r'\end' in line:
-                        block = ''
-                        continue;
+                if block != '':
+                    if 'itemize' in block or 'enumerate' in block:
+                        line = re.sub(r'\\item', '', line)
+                    continue
 
                 # do the replacements from self.replace
                 for pair in self.replace:
@@ -107,7 +120,7 @@ class DeLaTeX:
                         line = re.sub(pair[0], pair[1], line)
                     except:
                         print(f'[{col("FAIL", color="red")}]')
-                        print(f'Error while parsing with regex: {pair[0]}')
+                        print(f'Error while parsing regex: {pair[0]}')
                         return False
 
                 fo.write(line)
@@ -116,11 +129,11 @@ class DeLaTeX:
         if block == '':
             print(f'[{col("OK", color="green")}]')
             return True
-        else:
-            print(f'[{col("FAIL", color="red")}]')
-            print(f'Some begin//end block remained unparsed')
-            print('Some part of the file could be missed')
-            return False
+
+        print(f'[{col("FAIL", color="red")}]')
+        print('Some begin//end block remained unparsed:', block)
+        print('Some part of the file could be missed')
+        return False
 
 import click
 from termcolor import colored as col
@@ -128,7 +141,7 @@ from termcolor import colored as col
 @click.argument('input_file')
 @click.argument('output_file')
 def main(input_file, output_file):
-    parser =  DeLaTeX(input_file, output_file)
+    parser = DeLaTeX(input_file, output_file)
     parser.do_parse()
 
 if __name__ == '__main__':
