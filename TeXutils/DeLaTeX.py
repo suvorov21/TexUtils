@@ -106,7 +106,7 @@ class DeLaTeX:
                         end_block = r'\end{' + block + "}"
                         if end_block in line:
                             block = ''
-                        continue
+                    continue
 
                 # parse item or numerate lists
                 if block != '':
