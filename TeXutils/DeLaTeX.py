@@ -50,8 +50,8 @@ class DeLaTeX:
             [r'\\subsubsubsection{(.+)}',       r'\1']
             ])
 
-    def add_replacement(self, l):
-        for pair in l:
+    def add_replacement(self, rep_list):
+        for pair in rep_list:
             self.replace.append(pair)
 
     def do_parse(self):
@@ -137,6 +137,7 @@ class DeLaTeX:
 
 import click
 from termcolor import colored as col
+
 @click.command()
 @click.argument('input_file')
 @click.argument('output_file')
