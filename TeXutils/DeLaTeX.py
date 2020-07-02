@@ -74,7 +74,8 @@ class DeLaTeX:
                     break
                 # service tags
                 if r'\maketitle' in line or r'\clearpage' in line or \
-                r'\tableofcontents' in line or r'\linenumbers' in line:
+                r'\tableofcontents' in line or r'\linenumbers' in line \
+                or r'\newcommand' in line:
                     continue
                 # skip labels
                 if r'\label' in line:
