@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 
+import click
+from termcolor import colored as col
+
 class BibParser:
     def __init__(self, file_in="", file_out="", skip=0):
         self.file_in    = file_in
@@ -90,8 +93,6 @@ class BibParser:
         print(f'[{col("OK", color="green")}]')
         return True
 
-import click
-from termcolor import colored as col
 
 @click.command()
 @click.argument('input_file')

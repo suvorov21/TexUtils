@@ -15,5 +15,6 @@ setuptools.setup(
         [console_scripts]
         bibparser=TeXutils.BibParser:main
         delatex=TeXutils.DeLaTeX:main
+        figunused=TeXutils.FindUnused:main
     ''',
     )
