@@ -55,17 +55,26 @@ class BibParser:
             # add few rules
             for line in f:
                 # ommit abstract
-                if line[:8] == 'abstract' or line[:4] == 'file' \
-                        or line[:8] == 'keywords':
+                if 'abstract = ' in line or 'file = ' in line \
+                        or 'keywords = ' in line:
                     continue
                 # add month w/o brackets
-                if line[:5] == 'month':
+                if 'month = ' in line:
                     line = line.replace("{", "")
                     line = line.replace("}", "")
+
+                if 'author = ' in line:
+                    authors = line.split('author =')[1]
+                    authors = authors.replace('{', '')
+                    authors = authors.replace('}', '')
+                    authors = authors.split('and')
+                    if len(authors) > 1:
+                        line = 'author = {' + authors[0] + ' et al},\n'
 
                 # remove unicode artefacts
                 line = line.replace("→", "$\\to$")
                 line = line.replace("µ", "$\\mu$")
+                line = line.replace("π", "$\\pi$")
                 line = line.replace("Ɵ", "$\\theta$")
                 line = line.replace("×", "$\\times$")
                 line = line.replace("×1021", "$\\times10^{21}$")
